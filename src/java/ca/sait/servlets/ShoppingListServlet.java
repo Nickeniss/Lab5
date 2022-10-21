@@ -29,8 +29,13 @@ public class ShoppingListServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String action = request.getParameter("action");
         String name = (String) request.getSession().getAttribute("name");
-        if (name != null) {
+        if (name != null && action.equals("logout")) {
+            request.getSession().invalidate();
+            response.sendRedirect("shoppingList");
+            return; 
+        } else if (name != null){
             this.getServletContext().getRequestDispatcher("/WEB-INF/shoppingList.jsp").forward(request, response);
         } else {
             this.getServletContext().getRequestDispatcher("/WEB-INF/register.jsp").forward(request, response);
@@ -53,15 +58,21 @@ public class ShoppingListServlet extends HttpServlet {
 
         if (action.equals("register")) {
             String name = request.getParameter("name");
-            if (!name.equals(null)) {
-
+            if (name != null) {
                 request.getSession().setAttribute("items", new ArrayList<String>());
                 request.getSession().setAttribute("name", name);
             }
         } else if (action.equals("add")) {
             String item = request.getParameter("item");
             ArrayList<String> items = (ArrayList<String>) request.getSession().getAttribute("items");
+
             items.add(item);
+            request.getSession().setAttribute("items", items);
+        } else if (action.equals("delete")) {
+            String itemValue = request.getParameter("item");
+            ArrayList<String> items = (ArrayList<String>) request.getSession().getAttribute("items");
+
+            items.remove(itemValue);
             request.getSession().setAttribute("items", items);
         }
 
